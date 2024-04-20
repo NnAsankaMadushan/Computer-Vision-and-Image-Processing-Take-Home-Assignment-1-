@@ -35,8 +35,16 @@ mask = np.zeros_like(image)
 for x, y in segmented_region:
     mask[x, y] = 255
 
-# Display results
-cv2.imshow('Original Image', image)
-cv2.imshow('Segmented Region', mask)
+# Define the desired window size (adjust as needed)
+window_width = 600
+window_height = 600
+
+# Resize the original and segmented images to fit the window
+resized_image = cv2.resize(image, (window_width, window_height))
+resized_mask = cv2.resize(mask, (window_width, window_height))
+
+# Display results in small windows
+cv2.imshow('Resized Original Image', resized_image)
+cv2.imshow('Resized Segmented Region', resized_mask)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
