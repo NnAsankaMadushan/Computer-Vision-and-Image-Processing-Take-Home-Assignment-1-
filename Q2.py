@@ -1,50 +1,53 @@
-import cv2
 import numpy as np
+import cv2
+import matplotlib.pyplot as plt
 
-def region_growing(image, seed):
-    visited = np.zeros_like(image)
-    queue = [seed]
-    region = []
+def region_growing(img, seed):
+    height, width = img.shape
+    segment = np.zeros((height, width), np.uint8)
+    visited = np.zeros((height, width))
 
-    while queue:
-        x, y = queue.pop(0)
-        if visited[x, y] == 0:
-            visited[x, y] = 1
-            region.append((x, y))
+    # List to hold the pixel positions that need to be checked
+    active_list = []
+    active_list.append(seed)
 
-            for dx in range(-1, 2):
-                for dy in range(-1, 2):
-                    nx, ny = x + dx, y + dy
-                    if 0 <= nx < image.shape[0] and 0 <= ny < image.shape[1]:
-                        if abs(image[nx, ny] - image[x, y]) < 20:
-                            queue.append((nx, ny))
+    while len(active_list) > 0:
+        x, y = active_list.pop()
+        if visited[y,x] == 1:
+            continue
+        visited[y,x] = 1
 
-    return region
+        # Check if current pixel value is within the predefined range of seed pixel value
+        if abs(int(img[x,y]) - int(img[seed])) <= threshold:
+            segment[x,y] = img[x,y]
+            # Add neighbouring pixels to the list
+            if x > 0: active_list.append((x-1, y))
+            if x < height-1: active_list.append((x+1, y))
+            if y > 0: active_list.append((x, y-1))
+            if y < width-1: active_list.append((x, y+1))
 
-# Load your image
-image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
+    return segment
 
-# Define seed point (you can choose any point inside the object)
-seed_point = (100, 100)
+# Load an example image (grayscale)
+img = cv2.imread('Image_02.jpg', cv2.IMREAD_GRAYSCALE)
 
-# Get segmented region
-segmented_region = region_growing(image, seed_point)
+# Define a seed point and threshold value for segmentation 
+seed_point = (50,50)
+threshold = 20
 
-# Create a mask for visualization
-mask = np.zeros_like(image)
-for x, y in segmented_region:
-    mask[x, y] = 255
+segmented_image = region_growing(img, seed_point)
 
-# Define the desired window size (adjust as needed)
-window_width = 600
-window_height = 600
+# Display the original and segmented images
+plt.figure(figsize=(10,10))
 
-# Resize the original and segmented images to fit the window
-resized_image = cv2.resize(image, (window_width, window_height))
-resized_mask = cv2.resize(mask, (window_width, window_height))
+plt.subplot(1,2,1)
+plt.imshow(img, cmap='gray')
+plt.title('Original Image')
+plt.axis('off')
 
-# Display results in small windows
-cv2.imshow('Resized Original Image', resized_image)
-cv2.imshow('Resized Segmented Region', resized_mask)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.subplot(1,2,2)
+plt.imshow(segmented_image, cmap='gray')
+plt.title('Segmented Image')
+plt.axis('off')
+
+plt.show()

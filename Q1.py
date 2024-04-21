@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 
-
-
 # Load your image
 image = cv2.imread('Image_01.png', cv2.IMREAD_GRAYSCALE)
 
